@@ -1,0 +1,38 @@
+{
+    "press_release": [
+      {
+        "chi_json_links_file": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\links\\2025-10-17\\hhb_pressrelease\\2025_links_chi.json",
+        "eng_json_links_file": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\links\\2025-10-17\\hhb_pressrelease\\2025_links_eng.json",
+        "markdown_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\markdown",
+        "chi_json_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\json\\2025-07-18\\press_chi",
+        "eng_json_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\json\\2025-07-18\\press_eng"
+      }
+    ],
+    "speech": [
+        {
+          "chi_json_links_file": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\links\\2025-10-17\\hhb_speech\\2025_links_chi.json",
+          "eng_json_links_file": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\links\\2025-10-17\\hhb_speech\\2025_links_eng.json",
+          "markdown_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\markdown",
+          "chi_json_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\json\\2025-07-18\\speech_chi",
+          "eng_json_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\json\\2025-07-18\\speech_eng"
+        }
+      ],
+      "legco_qna": [
+        {
+          "chi_json_links_file": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\links\\2025-10-17\\hhb_legcoqna\\2025_links_chi.json",
+          "eng_json_links_file": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\links\\2025-10-17\\hhb_legcoqna\\2025_links_eng.json",
+          "markdown_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\markdown",
+          "chi_json_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\json\\2025-07-18\\qna_chi",
+          "eng_json_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\json\\2025-07-18\\qna_eng"
+        }
+      ],
+      "legco_panel_paper": [
+        {
+          "chi_json_links_file": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\links\\2025-10-17\\hhb_legcopanelpaper\\2025_links_chi.json",
+          "eng_json_links_file": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\links\\2025-10-17\\hhb_legcopanelpaper\\2025_links_eng.json",
+          "markdown_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\markdown",
+          "chi_json_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\json\\2025-07-18\\panel_paper_chi",
+          "eng_json_output_folder": "C:\\Users\\cylee\\Documents\\Additional Raw Data\\json\\2025-07-18\\panel_paper_eng"
+        }
+      ]
+  }

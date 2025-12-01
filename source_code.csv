@@ -1,0 +1,19 @@
+﻿source_name,source_code,dataset_code
+Health Bureau Press Release,pressrelease,hhb_pressrelease
+Health Bureau Speech,speech,hhb_speech
+Replies to Legislative Council by Health Bureau,legcoqna,hhb_legcoqna
+Legislative Council Panel on Health Services Papers,legcopanelpaper,hhb_legcopanelpaper
+Special Financial Committee - QnA,sfc,hhb_sfcqna
+Special Financial Committee - Speaking Notes,sfc,hhb_sfcspeakingnote
+Bills Committee on Advance Decision on Life-sustaining Treatment Bill (Papers) QnA,billcommittee,hhb_billcommitteeqna
+Bills Committee on Advance Decision on Life-sustaining Treatment Bill (Papers),billcommittee,hhb_billcommitteepaper
+Hospital Authority Annual Report,hareport,hhb_hareport
+Hospital Authority Strategic Plan,hastrategicplan,hhb_hastrategicplan
+"Introduction of VHIS, publicity materials and FAQs",introvhis,hhb_introvhis
+Press Releases of VHIS,pressreleasevhis,hhb_pressreleasevhis
+Scheme documents of VHIS,schemedocumentsofvhis,hhb_schemedocumentsofvhis
+Subcommittee on Two Pieces of Subsidiary Legislation Relating to Dying in Place QnA,legdipcommittee,hhb_legdipcommitteeqna
+Subcommittee on Two Pieces of Subsidiary Legislation Relating to Dying in Place Paper,legdipcommittee,hhb_legdipcommitteepaper
+What's News,whatsnews,hhb_whatsnews
+Consultancy reports in relation to VHIS,consultancyreports,hhb_consultancyreports
+Brief,brief,hhb_brief

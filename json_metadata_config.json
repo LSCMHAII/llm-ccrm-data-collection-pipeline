@@ -1,0 +1,30 @@
+{
+  "legco_panel_paper": [
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcopanelpaper\\ccrm\\new_json_output\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcopanelpaper\\ccrm\\new_json_output\\chi\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcopanelpaper\\llm\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcopanelpaper\\llm\\chi\\2025"
+  ],
+  "legco_qna": [
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcoqna\\ccrm\\new_json_output\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcoqna\\ccrm\\new_json_output\\chi\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcoqna\\llm\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcoqna\\llm\\chi\\2025"
+  ],
+  "press_release": [
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_pressrelease\\ccrm\\new_json_output\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_pressrelease\\ccrm\\new_json_output\\chi\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_pressrelease\\llm\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_pressrelease\\llm\\chi\\2025"
+  ],
+  "speech": [
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_speech\\ccrm\\new_json_output\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_speech\\ccrm\\new_json_output\\chi\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_speech\\llm\\2025",
+      "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_speech\\llm\\chi\\2025"
+  ],
+  "output_folder": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\raw_data script\\weekly_metadata_file",
+  "root_path": "\\\\10.104.1.17\\llm-ccrm\\data",
+  "source_code_file": "source_code.csv",
+  "target_import_date": "2025-10-17"
+}

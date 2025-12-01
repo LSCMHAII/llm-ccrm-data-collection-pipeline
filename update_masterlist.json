@@ -1,10 +1,10 @@
 {
     "excel_config": {
-        "excel_file": "C:/Users/cylee/Documents/PDF_To_Text_python/raw_data script/master_datasets_ccrm_llm_data_(latest).xlsx",
+        "excel_file": "/app/nas_data/pipeline_data_collection/Raw-data/master_datasets_ccrm_llm_data_(latest).xlsx",
         "sheets": [
             {
                 "sheet_name": "CCRM_Grand_Total",
-                "metadata_folder": "C:/Users/cylee/Documents/PDF_To_Text_python/raw_data script/weekly_metadata_file/ccrm_eng",
+                "metadata_folder": "/app/nas_data/pipeline_data_collection/metadata/ccrm_eng",
                 "compare_columns": [
                     "file_name",
                     "datset_code"
@@ -12,7 +12,7 @@
             },
             {
                 "sheet_name": "CCRM_Chi_Grand_Total",
-                "metadata_folder": "C:/Users/cylee/Documents/PDF_To_Text_python/raw_data script/weekly_metadata_file/ccrm_chi",
+                "metadata_folder": "/app/nas_data/pipeline_data_collection/metadata/ccrm_chi",
                 "compare_columns": [
                     "file_name",
                     "datset_code"
@@ -20,7 +20,7 @@
             },
             {
                 "sheet_name": "LLM_Grand_Total",
-                "metadata_folder": "C:/Users/cylee/Documents/PDF_To_Text_python/raw_data script/weekly_metadata_file/llm_eng",
+                "metadata_folder": "/app/nas_data/pipeline_data_collection/metadata/llm_eng",
                 "compare_columns": [
                     "file_name",
                     "datset_code"
@@ -28,7 +28,7 @@
             },
             {
                 "sheet_name": "LLM_Chi_Grand_Total",
-                "metadata_folder": "C:/Users/cylee/Documents/PDF_To_Text_python/raw_data script/weekly_metadata_file/llm_chi",
+                "metadata_folder": "/app/nas_data/pipeline_data_collection/metadata/llm_chi",
                 "compare_columns": [
                     "file_name",
                     "datset_code"
@@ -37,41 +37,5 @@
         ]
     },
     "csv_configs": [
-        {
-            "master_file": "CCRM_Grand_Total.csv",
-            "metadata_folder": "C:/Users/cylee/Documents/PDF_To_Text_python/raw_data script/weekly_metadata_file/ccrm_eng",
-            "compare_columns": [
-                "file_name",
-                "datset_code"
-            ],
-            "output_file": ""
-        },
-        {
-            "master_file": "CCRM_Chi_Grand_Total.csv",
-            "metadata_folder": "C:/Users/cylee/Documents/PDF_To_Text_python/raw_data script/weekly_metadata_file/ccrm_chi",
-            "compare_columns": [
-                "file_name",
-                "datset_code"
-            ],
-            "output_file": ""
-        },
-        {
-            "master_file": "LLM_Grand_Total.csv",
-            "metadata_folder": "C:/Users/cylee/Documents/PDF_To_Text_python/raw_data script/weekly_metadata_file/llm_eng",
-            "compare_columns": [
-                "file_name",
-                "datset_code"
-            ],
-            "output_file": ""
-        },
-        {
-            "master_file": "LLM_Chi_Grand_Total.csv",
-            "metadata_folder": "C:/Users/cylee/Documents/PDF_To_Text_python/raw_data script/weekly_metadata_file/llm_chi",
-            "compare_columns": [
-                "file_name",
-                "datset_code"
-            ],
-            "output_file": ""
-        }
     ]
 }

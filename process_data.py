@@ -143,32 +143,35 @@ def main(config, is_eng=False):
         urls = data['links']
 
     for url in urls:
-        html_content = fetch_url_content(url)
-        headline, press_release, press_release_text_plain = extract_specific_content_v1(html_content)
+        try:
+            html_content = fetch_url_content(url)
+            headline, press_release, press_release_text_plain = extract_specific_content_v1(html_content)
 
-        if not headline or not press_release:
-            headline, press_release, press_release_text_plain = extract_specific_content_v2(html_content)
+            if not headline or not press_release:
+                headline, press_release, press_release_text_plain = extract_specific_content_v2(html_content)
 
-        if is_eng:
-            date, time = extract_metadata_eng(press_release_text_plain)
-        else:
-            date, time = extract_metadata_chi(press_release_text_plain)
+            if is_eng:
+                date, time = extract_metadata_eng(press_release_text_plain)
+            else:
+                date, time = extract_metadata_chi(press_release_text_plain)
 
-        markdown_content = convert_to_markdown(headline, press_release)
+            markdown_content = convert_to_markdown(headline, press_release)
 
-        filename = get_filename_from_url(url)
-        markdown_path = os.path.join(config['markdown_output_folder'], filename)
-        save_as_markdown(markdown_content, markdown_path)
+            filename = get_filename_from_url(url)
+            markdown_path = os.path.join(config['markdown_output_folder'], filename)
+            save_as_markdown(markdown_content, markdown_path)
 
-        json_data = convert_markdown_to_json(markdown_content, date, time, url)
-        json_filename = filename.replace('.md', '.json')
-        json_path = os.path.join(config['json_output_folder'], json_filename)
+            json_data = convert_markdown_to_json(markdown_content, date, time, url)
+            json_filename = filename.replace('.md', '.json')
+            json_path = os.path.join(config['json_output_folder'], json_filename)
 
-        with open(json_path, 'w', encoding='utf-8') as json_file:
-            json.dump(json_data, json_file, ensure_ascii=False, indent=4)
+            with open(json_path, 'w', encoding='utf-8') as json_file:
+                json.dump(json_data, json_file, ensure_ascii=False, indent=4)
 
-        print(f"✅ Saved Markdown: {markdown_path}")
-        print(f"✅ Saved JSON: {json_path}")
+            print(f"✅ Saved Markdown: {markdown_path}")
+            print(f"✅ Saved JSON: {json_path}")
+        except Exception as e:
+            print(f"❌ Failed to process {url}: {e}")
 
 # === Extract Panel Paper ===
 def download_pdf(pdf_url, local_path):
@@ -307,10 +310,10 @@ def extract_json_metadata(json_path, year, dataset_code, source_info_mapping, co
 
     root_path = config['root_path']
     data_file_path = full_path[len(root_path):] if full_path.startswith(root_path) else full_path
-    if not data_file_path.startswith(r"\\"):
-        data_file_path = "\\" + data_file_path
+    if not data_file_path.startswith("/"):
+        data_file_path = "/" + data_file_path
 
-    file_path = os.path.join(root_path, data_file_path.lstrip("\\"))
+    file_path = os.path.join(root_path, data_file_path.lstrip("/"))
 
     meta_date = data.get('metadata', {}).get('date', '')
     date = format_date(meta_date)
@@ -379,7 +382,7 @@ def generate_csv_filename(folder_path, dataset_code):
     return f"{prefix}{after_dataset_folder}_{dataset_code}_metadata.csv"
 
 # --- Excel Masterlist Update Section ---
-def update_excel_masterlist(excel_config, target_date):
+def update_excel_masterlist(excel_config, target_date=None):
     excel_path = excel_config["excel_file"]
     sheet_configs = excel_config["sheets"]
 
@@ -394,11 +397,15 @@ def update_excel_masterlist(excel_config, target_date):
         pattern = os.path.join(metadata_folder, "*.csv")
         files = glob.glob(pattern)
         dfs = [pd.read_csv(file).dropna(how="all") for file in files]
+        if not dfs:
+            print(f"No metadata CSVs found in {metadata_folder}. Skipping sheet.")
+            continue
         metadata_df = pd.concat(dfs, ignore_index=True)
 
         metadata_df.rename(columns={"dataset_code": "datset_code"}, inplace=True)
         metadata_df["import_date"] = pd.to_datetime(metadata_df["import_date"], errors="coerce")
-        metadata_df = metadata_df[metadata_df["import_date"] == pd.to_datetime(target_date)]
+        if target_date:
+            metadata_df = metadata_df[metadata_df["import_date"] == pd.to_datetime(target_date)]
         metadata_df = metadata_df.dropna(subset=["file_name", "datset_code"])
         metadata_df = metadata_df[
             (metadata_df["file_name"].str.strip() != "") &
@@ -424,7 +431,7 @@ def update_excel_masterlist(excel_config, target_date):
             print(f"✅ No new data added to sheet {sheet_name}")
             continue
 
-        if "id" in master_df.columns:
+        if "id" in master_df.columns and not master_df.empty:
             master_df["id"] = pd.to_numeric(master_df["id"], errors="coerce")
             max_id = master_df["id"].dropna().astype(int).max()
             new_ids = range(max_id + 1, max_id + 1 + len(new_rows_df))
@@ -527,10 +534,11 @@ def get_latest_friday(today):
     return today - timedelta(days=offset)
 
 
-def main_metadata():
+def main_metadata(base_path=None, target_date=None):
     print("Start running create JSON Metadata Files")
 
-    with open("json_metadata_config.json", 'r', encoding='utf-8') as f:
+    with open(os.path.join(base_path, "json_metadata_config.json"),
+              'r', encoding='utf-8') as f:
         json_config_data = json.load(f)
 
     json_config = {
@@ -542,8 +550,10 @@ def main_metadata():
 
     folder_paths = []
     for key, value in json_config_data.items():
-        if isinstance(value, list):
-            folder_paths.extend([v for v in value if isinstance(v, str) and v.startswith("\\\\")])
+        if isinstance(value, list) and key in [
+            "legco_panel_paper", "legco_qna", "press_release", "speech"
+            ]:
+            folder_paths.extend([v for v in value if isinstance(v, str)])
 
     os.makedirs(json_config['output_folder'], exist_ok=True)
     source_info_mapping = load_source_mapping(json_config)
@@ -562,29 +572,37 @@ def main_metadata():
 
         subfolder_path = os.path.join(json_config['output_folder'], target_folder_name)
         os.makedirs(subfolder_path, exist_ok=True)
+        if not metadata_list:
+            print(f"No metadata extracted for folder {folder_path}. "
+                f"Skipping CSV creation.")
+        else:
+            csv_path = os.path.join(subfolder_path, csv_filename)
+            save_metadata_to_csv(metadata_list, csv_path)
+            print(f"✅ Metadata saved to: {csv_path}")
 
-        csv_path = os.path.join(subfolder_path, csv_filename)
-        save_metadata_to_csv(metadata_list, csv_path)
-        print(f"✅ Metadata saved to: {csv_path}")
-
-    with open("update_masterlist.json", "r", encoding="utf-8") as f:
+    with open(os.path.join(base_path, "update_masterlist.json"),
+              "r", encoding="utf-8") as f:
         config = json.load(f)
 
-    latest_friday = get_latest_friday(datetime.today()).strftime("%Y-%m-%d")
+    # latest_friday = get_latest_friday(datetime.today()).strftime("%Y-%m-%d")
 
     print("Start running update Masterlist Excel")
-    update_excel_masterlist(config["excel_config"], latest_friday)
+    update_excel_masterlist(config["excel_config"], target_date)
 
     print("Start running update CSV Master list")
     for csv_config in config["csv_configs"]:
-        csv_config["target_date"] = latest_friday
+        csv_config["target_date"] = target_date
         csv_config["output_file"] = csv_config.get("output_file") or "updated_" + os.path.basename(csv_config["master_file"])
         processor = MetadataProcessor(csv_config)
         processor.run()
 
 
-if __name__ == "__main__":
-    with open("raw_data_config.json", "r", encoding="utf-8") as f:
+def main_combined(base_path=None, target_date=None):
+    if base_path is None:
+        base_path = '.'
+    with open(
+        os.path.join(base_path, "raw_data_config.json"), "r", encoding="utf-8"
+    ) as f:
         config_data = json.load(f)
 
     def run_task(section_name, lang_key):
@@ -635,4 +653,8 @@ if __name__ == "__main__":
 
     # === Step 3: Extract JSON Metadata & Update Masterlists ===
     print("\n🚀 Running Metadata Extraction and Masterlist Update")
-    main_metadata()
+    main_metadata(base_path, target_date)
+
+
+if __name__ == "__main__":
+    main_combined()

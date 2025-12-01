@@ -5,12 +5,16 @@ import time
 import argparse
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 from utils import (
     linkExtractor, extract_year, get_html_content, parse_html,
     get_title, extract_press_release_content, get_date_time,
     create_json_data, save_json_data
 )
+
 
 def get_url_label(base_url):
     lang = "cn" if "/cn/" in base_url else "en"
@@ -82,7 +86,7 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, get_lin
                 print(f"Year not found in the URL: {link}")
 
 def main_pressrelease(base_path):
-    config_path = os.path.join(base_path, r"\\10.104.1.17\llm-ccrm\data\pipeline_data_collection\links_config.json")
+    config_path = os.path.join(base_path, 'links_config.json')
     with open(config_path, 'r', encoding='utf-8') as f:
         config_data = json.load(f)
 
@@ -98,9 +102,15 @@ def main_pressrelease(base_path):
 
 # Download Legco Panel Paper links
 def setup_driver():
-    options = webdriver.ChromeOptions()
+    options = Options()
     options.add_argument('--headless')
-    return webdriver.Chrome(options=options)
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-gpu")
+
+    driver_path = ChromeDriverManager().install()
+    service = Service(driver_path)
+
+    return webdriver.Chrome(service=service, options=options)
 
 def fetch_page_source(url):
     driver = setup_driver()
@@ -142,8 +152,7 @@ def save_links_to_json(links, year, lang, output_folder):
         json.dump(data, f, ensure_ascii=False, indent=2)
     return output_path
 
-def main_legco(config):
-    base_path = '.'
+def main_legco(config, base_path='.'):
     link_path = os.path.join(base_path, 'links')
 
     for lang in ["chi", "eng"]:
@@ -208,8 +217,9 @@ def main_link_filter(config_path):
         print(f"✅ Saved {category} filtered links")
 
 # ---------------- 主流程入口 ----------------
-def main_combined():
-    base_path = r'\\10.104.1.17\llm-ccrm\data\pipeline_data_collection'
+def main_combined(base_path=None):
+    if base_path is None:
+        base_path = '.'
 
     print("開始執行第一組代碼：新聞稿擷取")
     main_pressrelease(base_path)
@@ -218,7 +228,7 @@ def main_combined():
     legco_config_path = os.path.join(base_path, 'panel_paper_link_config.json')
     with open(legco_config_path, 'r', encoding='utf-8') as f:
         legco_config = json.load(f)
-    main_legco(legco_config)
+    main_legco(legco_config, base_path)
 
     print("\n第二組代碼完成，開始執行第三組代碼：比對新舊連結")
     link_filter_config_path = os.path.join(base_path, 'filtering_link_config.json')

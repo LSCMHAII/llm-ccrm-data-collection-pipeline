@@ -1,26 +1,26 @@
 {
     "press_release": {
-        "chi_old": "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_pressrelease\\link\\chi version\\2025_links.json",
-        "eng_old": "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_pressrelease\\link\\2025_links.json",
-        "chi_new": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\scripts\\links\\2025_links_press_cn.json",
-        "eng_new": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\scripts\\links\\2025_links_press_en.json"
+        "chi_old": "/app/nas_data/pipeline_data_collection/links/old/2025_links_press_cn.json",
+        "eng_old": "/app/nas_data/pipeline_data_collection/links/old/2025_links_press_en.json",
+        "chi_new": "/app/nas_data/pipeline_data_collection/links/2025_links_press_cn.json",
+        "eng_new": "/app/nas_data/pipeline_data_collection/links/2025_links_press_en.json"
     },
     "legco_qna": {
-        "chi_old": "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcoqna\\link\\chi version\\2025_links.json",
-        "eng_old": "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcoqna\\link\\2025_links.json",
-        "chi_new": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\scripts\\links\\2025_links_replies_cn.json",
-        "eng_new": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\scripts\\links\\2025_links_replies_en.json"
+        "chi_old": "/app/nas_data/pipeline_data_collection/links/old/2025_links_replies_cn.json",
+        "eng_old": "/app/nas_data/pipeline_data_collection/links/old/2025_links_replies_en.json",
+        "chi_new": "/app/nas_data/pipeline_data_collection/links/2025_links_replies_cn.json",
+        "eng_new": "/app/nas_data/pipeline_data_collection/links/2025_links_replies_en.json"
     },
     "speech": {
-        "chi_old": "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_speech\\link\\chi version\\2025_links.json",
-        "eng_old": "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_speech\\link\\2025_links.json",
-        "chi_new": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\scripts\\links\\2025_links_speech_cn.json",
-        "eng_new": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\scripts\\links\\2025_links_speech_en.json"
+        "chi_old": "/app/nas_data/pipeline_data_collection/links/old/2025_links_speech_cn.json",
+        "eng_old": "/app/nas_data/pipeline_data_collection/links/old/2025_links_speech_en.json",
+        "chi_new": "/app/nas_data/pipeline_data_collection/links/2025_links_speech_cn.json",
+        "eng_new": "/app/nas_data/pipeline_data_collection/links/2025_links_speech_en.json"
     },
     "legco_panel_paper": {
-        "chi_old": "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcopanelpaper\\link\\chi\\2025_links.json",
-        "eng_old": "\\\\10.104.1.17\\llm-ccrm\\data\\Raw-data\\hhb_legcopanelpaper\\link\\eng\\2025_links.json",
-        "chi_new": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\scripts\\links\\2025_links_panel_paper_chi.json",
-        "eng_new": "C:\\Users\\cylee\\Documents\\PDF_To_Text_python\\scripts\\links\\2025_links_panel_paper_eng.json"
+        "chi_old": "/app/nas_data/pipeline_data_collection/links/old/2025_links_panel_paper_chi.json",
+        "eng_old": "/app/nas_data/pipeline_data_collection/links/old/2025_links_panel_paper_eng.json",
+        "chi_new": "/app/nas_data/pipeline_data_collection/links/2025_links_panel_paper_chi.json",
+        "eng_new": "/app/nas_data/pipeline_data_collection/links/2025_links_panel_paper_eng.json"
     }
 }

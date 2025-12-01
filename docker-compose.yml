@@ -1,0 +1,20 @@
+services:
+  scraper:
+    image: "ccrm-data-collection"
+    ports:
+      - "5001:5000"
+    env_file:
+      - stack.env
+    restart: on-failure
+    networks:
+      - n8n
+    volumes:
+      - NAS:/app/nas_data
+
+volumes:
+  NAS:
+    external: true
+
+networks:
+  n8n:
+    external: true

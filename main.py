@@ -177,7 +177,7 @@ def load_json(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def save_json_diff(data, output_path):
+def save_json(data, output_path):
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
@@ -211,8 +211,11 @@ def main_link_filter(config_path):
         chi_diff = get_links_difference(chi_old, chi_new)
         eng_diff = get_links_difference(eng_old, eng_new)
 
-        save_json_diff({"links": chi_diff}, f"{category}_chi_diff_filtered.json")
-        save_json_diff({"links": eng_diff}, f"{category}_eng_diff_filtered.json")
+        save_json({"links": chi_diff}, f"{category}_chi_diff_filtered.json")
+        save_json({"links": eng_diff}, f"{category}_eng_diff_filtered.json")
+        
+        save_json({"links": chi_new}, paths['chi_old'])
+        save_json({"links": eng_new}, paths['eng_old'])
 
         print(f"✅ Saved {category} filtered links")
 

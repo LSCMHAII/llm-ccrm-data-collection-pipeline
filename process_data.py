@@ -322,8 +322,13 @@ def extract_json_metadata(json_path, year, dataset_code, source_info_mapping, co
 
     last_modified_timestamp = os.path.getmtime(json_path)
     last_modified_date = datetime.fromtimestamp(last_modified_timestamp).date()
-    target_date = config['target_import_date']
-    import_date = last_modified_date.strftime('%Y-%m-%d') if last_modified_date == target_date else 'N/A'
+    # target_date = config['target_import_date']
+    # if target_date:
+    #     target_date = datetime.strptime(target_date, "%Y-%m-%d").date()
+    #     import_date = last_modified_date.strftime('%Y-%m-%d') if last_modified_date == target_date else 'N/A'
+    # else:
+    #     target_date = datetime.today().strftime('%Y-%m-%d')
+    import_date = datetime.today().strftime('%Y-%m-%d')
 
     return {
         "id": " ",
@@ -545,7 +550,7 @@ def main_metadata(base_path=None, target_date=None):
         "output_folder": json_config_data.get("output_folder", "./output"),
         "root_path": json_config_data.get("root_path", "./data"),
         "source_code_file": json_config_data.get("source_code_file", "source_code.csv"),
-        "target_import_date": datetime.strptime(json_config_data.get("target_import_date", "2025-10-17"), "%Y-%m-%d").date()
+        "target_import_date": json_config_data.get("target_import_date")
     }
 
     folder_paths = []

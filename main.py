@@ -19,7 +19,7 @@ def get_url_label(base_url):
             return f"{label}_{lang}"
     return f"unknown_{lang}"
 
-def extract_pressrelease(base_path, base_url, year_start, year_end=None, get_links=True):
+def extract_pressrelease(base_path, base_url, year_start, year_end=None, month=None, get_links=True):
     year_end = year_start if year_end is None else year_end
     link_path = os.path.join(base_path, 'links')
     data_base_path = os.path.join(base_path, 'data')
@@ -28,7 +28,7 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, get_lin
     for year in range(year_start, year_end + 1):
         links_file = os.path.join(link_path, f"{year}_links_{url_label}.json")
         if get_links:
-            linkExtractor(link_path, base_url, year)
+            linkExtractor(link_path, base_url, year, month)  # 傳入 month
 
         if not os.path.exists(links_file):
             print(f"Links file not found: {links_file}")
@@ -42,6 +42,7 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, get_lin
 
         for link in links_data.get("links", []):
             print(link)
+
             year = extract_year(link)
             if year is not None:
                 link = '/'.join(link.split('/')[1:])
@@ -54,7 +55,7 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, get_lin
                     pressrelease = extract_press_release_content(soup)
 
                     if pressrelease:
-                        pattern = r'&amp;lt;br/&amp;gt;\n|&amp;lt;/p&amp;gt;\n&amp;lt;p&amp;gt;|&amp;lt;br/&amp;gt;\r\n'
+                        pattern = r'&amp;amp;lt;br/&amp;amp;gt;\n|&amp;amp;lt;/p&amp;amp;gt;\n&amp;amp;lt;p&amp;amp;gt;|&amp;amp;lt;br/&amp;amp;gt;\r\n'
                         content = re.split(pattern, str(pressrelease))
 
                         try:
@@ -66,7 +67,7 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, get_lin
                             continue
 
                         content_dict = {
-                            f"p{i+1}": part.lstrip("&amp;lt;br/&amp;gt;\n").strip()
+                            f"p{i+1}": part.lstrip("&amp;amp;lt;br/&amp;amp;gt;\n").strip()
                             for i, part in enumerate(content) if part.strip()
                         }
                         data["content"] = content_dict
@@ -81,21 +82,21 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, get_lin
             else:
                 print(f"Year not found in the URL: {link}")
 
-def main_pressrelease(base_path):
-    config_path = os.path.join(base_path, r"\\10.104.1.17\llm-ccrm\data\pipeline_data_collection\links_config.json")
+def main_pressrelease(base_path, month=None):
+    config_path = os.path.join(base_path, 'links_config.json')
     with open(config_path, 'r', encoding='utf-8') as f:
         config_data = json.load(f)
 
     year_start = 2025
     year_end = 2025
     get_links = True
-
+    
     for category in config_data:
-        urls = config_data.get(category, [])
-        for base_url in urls:
-            print(f"\n--- Processing {category} URL: {base_url} ---")
-            extract_pressrelease(base_path, base_url, year_start, year_end, get_links)
-
+            urls = config_data.get(category, [])
+            for base_url in urls:
+                print(f"\n--- Processing {category} URL: {base_url} ---")
+                extract_pressrelease(base_path, base_url, year_start, year_end, month, get_links)
+                
 # Download Legco Panel Paper links
 def setup_driver():
     options = webdriver.ChromeOptions()
@@ -162,8 +163,6 @@ def main_legco(config):
 
         print(f"[{lang.upper()}] 共擷取 {len(links)} 筆連結，已儲存至：{output_file}")
 
-
-
 def load_json(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -206,13 +205,12 @@ def main_link_filter(config_path):
         save_json_diff({"links": eng_diff}, f"{category}_eng_diff_filtered.json")
 
         print(f"✅ Saved {category} filtered links")
-
 # ---------------- 主流程入口 ----------------
 def main_combined():
     base_path = r'\\10.104.1.17\llm-ccrm\data\pipeline_data_collection'
-
+    month = 12
     print("開始執行第一組代碼：新聞稿擷取")
-    main_pressrelease(base_path)
+    main_pressrelease(base_path, month)
 
     print("\n第一組代碼完成，開始執行第二組代碼：立法會連結擷取")
     legco_config_path = os.path.join(base_path, 'panel_paper_link_config.json')
@@ -226,3 +224,4 @@ def main_combined():
 
 if __name__ == '__main__':
     main_combined()
+

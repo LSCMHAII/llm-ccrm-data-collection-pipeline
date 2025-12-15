@@ -57,7 +57,8 @@ def save_json_data(data, filename):
         json.dump(data, file, ensure_ascii=False, indent=4)
     print("JSON file created successfully.")
 
-def linkExtractor(data_path, base_url, year):
+
+def linkExtractor(data_path, base_url, year, month=None):
     lang = "cn" if "/cn/" in base_url else "en"
     for label in ["speech", "press", "replies"]:
         if label in base_url:
@@ -71,19 +72,32 @@ def linkExtractor(data_path, base_url, year):
 
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, "html.parser")
-        links = [link.get("href") for link in soup.find_all("a") if link.get("href")]
-        links_json = {"links": links}
+        links = []
 
-        # today_str = datetime.today().strftime("%Y%m%d")
-        # filename = f"{year}_links_{url_label}_{today_str}.json"
+        # 找到新聞稿表格中的所有行
+        rows = soup.find_all("tr")
+        for row in rows:
+            cols = row.find_all("td")
+            if len(cols) >= 2:
+                date_text = cols[0].get_text(strip=True)  # 例如 "09/12/2025"
+                link_tag = cols[1].find("a", href=True)
+                if link_tag:
+                    href = link_tag["href"]
+                    # 檢查月份
+                    try:
+                        day, mth, yr = map(int, date_text.split("/"))
+                        if month and mth != month:
+                            continue  # 跳過非指定月份
+                    except ValueError:
+                        continue
+                    links.append(href)
+
+        links_json = {"links": links}
         filename = f"{year}_links_{url_label}.json"
         os.makedirs(data_path, exist_ok=True)
         json_path = os.path.join(data_path, filename)
 
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(links_json, f, ensure_ascii=False, indent=4)
-        print(f"Saved {json_path}")
+        print(f"Saved {json_path} (共 {len(links)} 筆連結)")
         return filename
-    else:
-        print(f"Error: {response.status_code} for {url}")
-        return None

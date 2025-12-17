@@ -105,7 +105,6 @@ def linkExtractor(data_path, base_url, year, month=None):
 
         # JSON 資料
         links_json = {
-            # "extracted_date": today.strftime("%Y-%m-%d"),
             "links": links
         }
 

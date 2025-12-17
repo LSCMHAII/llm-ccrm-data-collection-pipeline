@@ -96,7 +96,7 @@ def main_pressrelease(base_path, month=None):
             for base_url in urls:
                 print(f"\n--- Processing {category} URL: {base_url} ---")
                 extract_pressrelease(base_path, base_url, year_start, year_end, month, get_links)
-                
+
 # Download Legco Panel Paper links
 def setup_driver():
     options = webdriver.ChromeOptions()
@@ -187,28 +187,46 @@ def safe_load_links(path):
         print(f"❌ Error loading {path}: {e}")
         return []
 
+def append_to_existing_file(new_links, file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            old_data = json.load(f)
+            old_links = old_data.get("links", [])
+    except FileNotFoundError:
+        old_links = []
+
+    # 合併並以倒序方式排序
+    combined_links = sorted(set(old_links + new_links), reverse=True)
+
+    # 寫回到原先的link檔案
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump({"links": combined_links}, f, indent=2, ensure_ascii=False)
+
 def main_link_filter(config_path):
     config_data = load_json(config_path)
 
     for category, paths in config_data.items():
         print(f"\n🔍 Dataset: {category}")
 
-        chi_old = filter_links(safe_load_links(paths['chi_old']))
-        eng_old = filter_links(safe_load_links(paths['eng_old']))
-        chi_new = filter_links(safe_load_links(paths['chi_new']))
-        eng_new = filter_links(safe_load_links(paths['eng_new']))
+        chi_old_links = filter_links(safe_load_links(paths['chi_old']))
+        eng_old_links = filter_links(safe_load_links(paths['eng_old']))
+        chi_new_links = filter_links(safe_load_links(paths['chi_new']))
+        eng_new_links = filter_links(safe_load_links(paths['eng_new']))
 
-        chi_diff = get_links_difference(chi_old, chi_new)
-        eng_diff = get_links_difference(eng_old, eng_new)
+        chi_diff = get_links_difference(chi_old_links, chi_new_links)
+        eng_diff = get_links_difference(eng_old_links, eng_new_links)
 
-        save_json_diff({"links": chi_diff}, f"{category}_chi_diff_filtered.json")
-        save_json_diff({"links": eng_diff}, f"{category}_eng_diff_filtered.json")
+        # 將新data link添加至舊的link檔案
+        append_to_existing_file(chi_diff, paths['chi_old'])
+        append_to_existing_file(eng_diff, paths['eng_old'])
 
-        print(f"✅ Saved {category} filtered links")
+        print(f"✅ Updated {category}: appended and sorted links in old files")
+
 # ---------------- 主流程入口 ----------------
 def main_combined():
-    base_path = r'\\10.104.1.17\llm-ccrm\data\pipeline_data_collection'
+    base_path = "."
     month = 12
+
     print("開始執行第一組代碼：新聞稿擷取")
     main_pressrelease(base_path, month)
 
@@ -224,4 +242,3 @@ def main_combined():
 
 if __name__ == '__main__':
     main_combined()
-

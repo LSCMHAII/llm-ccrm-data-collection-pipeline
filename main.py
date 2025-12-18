@@ -5,26 +5,29 @@ import time
 import argparse
 from bs4 import BeautifulSoup
 from selenium import webdriver
-
+from datetime import datetime
 from utils import (
     linkExtractor, extract_year, get_html_content, parse_html,
     get_title, extract_press_release_content, get_date_time,
     create_json_data, save_json_data
 )
-
+# Download Press Relase, Speech and Legco Qna links
 def get_url_label(base_url):
+    # Check URL Language (Chi or Eng)
     lang = "cn" if "/cn/" in base_url else "en"
+    # Check the type 
     for label in ["speech", "press", "replies"]:
         if label in base_url:
             return f"{label}_{lang}"
     return f"unknown_{lang}"
-
+# Extract Press Release, Speech and Legco Qna content and Save to JSON 
 def extract_pressrelease(base_path, base_url, year_start, year_end=None, month=None, get_links=True):
     year_end = year_start if year_end is None else year_end
-    link_path = os.path.join(base_path, 'links')
-    data_base_path = os.path.join(base_path, 'data')
-    url_label = get_url_label(base_url)
-
+    link_path = os.path.join(base_path, 'links') # Links Directory Folder
+    data_base_path = os.path.join(base_path, 'data') # Data Directory Folder
+    url_label = get_url_label(base_url) # URL Label
+    
+    # Iterate through a specified range of years
     for year in range(year_start, year_end + 1):
         links_file = os.path.join(link_path, f"{year}_links_{url_label}.json")
         if get_links:
@@ -146,6 +149,7 @@ def save_links_to_json(links, year, lang, output_folder):
 def main_legco(config):
     base_path = '.'
     link_path = os.path.join(base_path, 'links')
+    config["direct_path"] = datetime.now().strftime("%Y%m%d")
 
     for lang in ["chi", "eng"]:
         base_url = config[f"{lang}_link"]
@@ -225,10 +229,9 @@ def main_link_filter(config_path):
 # ---------------- 主流程入口 ----------------
 def main_combined():
     base_path = "."
-    month = 12
 
     print("開始執行第一組代碼：新聞稿擷取")
-    main_pressrelease(base_path, month)
+    main_pressrelease(base_path)
 
     print("\n第一組代碼完成，開始執行第二組代碼：立法會連結擷取")
     legco_config_path = os.path.join(base_path, 'panel_paper_link_config.json')

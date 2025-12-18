@@ -58,7 +58,9 @@ def save_json_data(data, filename):
     print("JSON file created successfully.")
 
 
+
 def linkExtractor(data_path, base_url, year, month=None):
+    # 判斷語言與標籤
     lang = "cn" if "/cn/" in base_url else "en"
     for label in ["speech", "press", "replies"]:
         if label in base_url:
@@ -67,6 +69,12 @@ def linkExtractor(data_path, base_url, year, month=None):
     else:
         url_label = f"unknown_{lang}"
 
+    # 當前日期
+    today = datetime.now()
+    today_day = today.day
+    today_month = today.month
+    today_year = today.year
+
     url = f"{base_url}/{year}.html"
     response = requests.get(url)
 
@@ -74,7 +82,7 @@ def linkExtractor(data_path, base_url, year, month=None):
         soup = BeautifulSoup(response.content, "html.parser")
         links = []
 
-        # 找到新聞稿表格中的所有行
+        # 搵table中的所有行
         rows = soup.find_all("tr")
         for row in rows:
             cols = row.find_all("td")
@@ -83,21 +91,29 @@ def linkExtractor(data_path, base_url, year, month=None):
                 link_tag = cols[1].find("a", href=True)
                 if link_tag:
                     href = link_tag["href"]
-                    # 檢查月份
                     try:
                         day, mth, yr = map(int, date_text.split("/"))
+                        # 檢查月份
                         if month and mth != month:
-                            continue  # 跳過非指定月份
+                            continue
+                        # 檢查是否是今天日期
+                        if day != today_day or mth != today_month or yr != today_year:
+                            continue
                     except ValueError:
                         continue
                     links.append(href)
 
-        links_json = {"links": links}
+        # JSON 資料
+        links_json = {
+            "links": links
+        }
+
         filename = f"{year}_links_{url_label}.json"
         os.makedirs(data_path, exist_ok=True)
         json_path = os.path.join(data_path, filename)
 
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(links_json, f, ensure_ascii=False, indent=4)
-        print(f"Saved {json_path} (共 {len(links)} 筆連結)")
+
+        print(f"Saved {json_path} (共 {len(links)} 筆連結, 僅保留今天日期: {today.strftime('%d/%m/%Y')})")
         return filename

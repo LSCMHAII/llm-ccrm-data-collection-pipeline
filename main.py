@@ -90,8 +90,8 @@ def main_pressrelease(base_path, month=None):
     with open(config_path, 'r', encoding='utf-8') as f:
         config_data = json.load(f)
 
-    year_start = 2025
-    year_end = 2025
+    year_start = 2026
+    year_end = 2026
     get_links = True
     
     for category in config_data:

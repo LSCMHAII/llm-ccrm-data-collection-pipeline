@@ -1,38 +1,38 @@
 {
   "press_release": [
     {
-      "chi_json_links_file": "/app/nas_data/pipeline_data_collection/links/2025_links_press_cn.json",
-      "eng_json_links_file": "/app/nas_data/pipeline_data_collection/links/2025_links_press_en.json",
+      "chi_json_links_file": "/app/nas_data/pipeline_data_collection/links/2026_links_press_cn.json",
+      "eng_json_links_file": "/app/nas_data/pipeline_data_collection/links/2026_links_press_en.json",
       "markdown_output_folder": "/app/nas_data/pipeline_data_collection/output/markdown",
-      "chi_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_pressrelease/ccrm/chi/2025",
-      "eng_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_pressrelease/ccrm/eng/2025"
+      "chi_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_pressrelease/ccrm/chi/2026",
+      "eng_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_pressrelease/ccrm/eng/2026"
     }
   ],
   "speech": [
     {
-      "chi_json_links_file": "/app/nas_data/pipeline_data_collection/links/2025_links_speech_cn.json",
-      "eng_json_links_file": "/app/nas_data/pipeline_data_collection/links/2025_links_speech_en.json",
+      "chi_json_links_file": "/app/nas_data/pipeline_data_collection/links/2026_links_speech_cn.json",
+      "eng_json_links_file": "/app/nas_data/pipeline_data_collection/links/2026_links_speech_en.json",
       "markdown_output_folder": "/app/nas_data/pipeline_data_collection/output/markdown",
-      "chi_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_speech/ccrm/chi/2025",
-      "eng_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_speech/ccrm/eng/2025"
+      "chi_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_speech/ccrm/chi/2026",
+      "eng_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_speech/ccrm/eng/2026"
     }
   ],
   "legco_qna": [
     {
-      "chi_json_links_file": "/app/nas_data/pipeline_data_collection/links/2025_links_replies_cn.json",
-      "eng_json_links_file": "/app/nas_data/pipeline_data_collection/links/2025_links_replies_en.json",
+      "chi_json_links_file": "/app/nas_data/pipeline_data_collection/links/2026_links_replies_cn.json",
+      "eng_json_links_file": "/app/nas_data/pipeline_data_collection/links/2026_links_replies_en.json",
       "markdown_output_folder": "/app/nas_data/pipeline_data_collection/output/markdown",
-      "chi_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_legcoqna/ccrm/chi/2025",
-      "eng_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_legcoqna/ccrm/eng/2025"
+      "chi_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_legcoqna/ccrm/chi/2026",
+      "eng_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_legcoqna/ccrm/eng/2026"
     }
   ],
   "legco_panel_paper": [
     {
-      "chi_json_links_file": "/app/nas_data/pipeline_data_collection/links/2025_links_panel_paper_chi.json",
-      "eng_json_links_file": "/app/nas_data/pipeline_data_collection/links/2025_links_panel_paper_eng.json",
+      "chi_json_links_file": "/app/nas_data/pipeline_data_collection/links/2026_links_panel_paper_chi.json",
+      "eng_json_links_file": "/app/nas_data/pipeline_data_collection/links/2026_links_panel_paper_eng.json",
       "markdown_output_folder": "/app/nas_data/pipeline_data_collection/output/markdown",
-      "chi_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_legcopanelpaper/ccrm/chi/2025",
-      "eng_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_legcopanelpaper/ccrm/eng/2025"
+      "chi_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_legcopanelpaper/ccrm/chi/2026",
+      "eng_json_output_folder": "/app/nas_data/pipeline_data_collection/Raw-data/hhb_legcopanelpaper/ccrm/eng/2026"
     }
   ]
 }

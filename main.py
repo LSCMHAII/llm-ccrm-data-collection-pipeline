@@ -24,36 +24,70 @@ def get_url_label(base_url):
         if label in base_url:
             return f"{label}_{lang}"
     return f"unknown_{lang}"
+
 # Extract Press Release, Speech and Legco Qna content and Save to JSON 
 def extract_pressrelease(base_path, base_url, year_start, year_end=None, month=None, get_links=True):
     year_end = year_start if year_end is None else year_end
-    link_path = os.path.join(base_path, 'links') # Links Directory Folder
-    data_base_path = os.path.join(base_path, 'data') # Data Directory Folder
-    url_label = get_url_label(base_url) # URL Label
-    
-    # Iterate through a specified range of years
-    for year in range(year_start, year_end + 1):
-        links_file = os.path.join(link_path, f"{year}_links_{url_label}.json")
+    link_path = os.path.join(base_path, 'links')
+    data_base_path = os.path.join(base_path, 'data')
+    url_label = get_url_label(base_url)
+
+    for y in range(year_start, year_end + 1):
+        links_file = os.path.join(link_path, f"{y}_links_{url_label}.json")
+        # Try to fetch today URL
         if get_links:
-            linkExtractor(link_path, base_url, year, month)  # 傳入 month
+            print(f"➡️ 第一次提取：以『今天』為條件")
+            linkExtractor(link_path, base_url, y, month=None)
 
+        # Check is there any files
         if not os.path.exists(links_file):
-            print(f"Links file not found: {links_file}")
-            continue
+            print(f"⚠️ 今天的連結檔案不存在，準備 fallback 提取整個月份...")
+        else:
+            # Read today url
+            with open(links_file, "r", encoding="utf-8") as f:
+                day_links_data = json.load(f)
+            if day_links_data.get("links"):
+                print(f"✅ 今天有找到 {len(day_links_data.get('links', []))} 筆連結，直接處理內容。")
+            else:
+                print("⚠️ 今天沒有連結，將 fallback 提取整個月份。")
 
-        with open(links_file, "r", encoding="utf-8") as f:
-            links_data = json.load(f)
+        need_month_fallback = (
+            not os.path.exists(links_file) or
+            not day_links_data.get("links", [])
+        )
 
-        data_path = os.path.join(data_base_path, f'{year}')
+        if need_month_fallback:
+            # If no month is specified, use the month of today.
+            fallback_month = month if month is not None else datetime.now().month
+            print(f"➡️ Fallback：Change to extract 'the entire month' (month={fallback_month})")
+            linkExtractor(link_path, base_url, y, month=fallback_month)
+
+            # Reload (the entire month)
+            if not os.path.exists(links_file):
+                print(f"❌ 仍未找到連結檔案，跳過年份 {y}")
+                continue
+
+            with open(links_file, "r", encoding="utf-8") as f:
+                month_links_data = json.load(f)
+
+            if not month_links_data.get("links"):
+                print(f"❌ 整個月份 (month={fallback_month}) 也沒有連結，跳過年份 {y}")
+                continue
+
+            links_data = month_links_data
+        else:
+            links_data = day_links_data
+
+        data_path = os.path.join(data_base_path, f'{y}')
         os.makedirs(data_path, exist_ok=True)
 
         for link in links_data.get("links", []):
-            print(link)
-
-            year = extract_year(link)
-            if year is not None:
-                link = '/'.join(link.split('/')[1:])
-                url = f"{base_url}/{link}"
+            print(f"處理連結: {link}")
+            link_year = extract_year(link) 
+            if link_year is not None:
+                # Combine complete URL
+                link_trimmed = '/'.join(link.split('/')[1:])
+                url = f"{base_url}/{link_trimmed}"
                 html_content = get_html_content(url)
 
                 if html_content:
@@ -62,7 +96,7 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, month=N
                     pressrelease = extract_press_release_content(soup)
 
                     if pressrelease:
-                        pattern = r'&amp;amp;lt;br/&amp;amp;gt;\n|&amp;amp;lt;/p&amp;amp;gt;\n&amp;amp;lt;p&amp;amp;gt;|&amp;amp;lt;br/&amp;amp;gt;\r\n'
+                        pattern = r'&amp;amp;amp;amp;lt;br/&amp;amp;amp;amp;gt;\n|&amp;amp;amp;amp;lt;/p&amp;amp;amp;amp;gt;\n&amp;amp;amp;amp;lt;p&amp;amp;amp;amp;gt;|&amp;amp;amp;amp;lt;br/&amp;amp;amp;amp;gt;\r\n'
                         content = re.split(pattern, str(pressrelease))
 
                         try:
@@ -70,11 +104,11 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, month=N
                             data = create_json_data(title, date, time_str)
                             content = content[:-2]
                         except (IndexError, AttributeError):
-                            print(f"Error with {link}")
+                            print(f"❌ Date parsing failed：{link}")
                             continue
 
                         content_dict = {
-                            f"p{i+1}": part.lstrip("&amp;amp;lt;br/&amp;amp;gt;\n").strip()
+                            f"p{i+1}": part.lstrip("&amp;amp;amp;amp;lt;br/&amp;amp;amp;amp;gt;\n").strip()
                             for i, part in enumerate(content) if part.strip()
                         }
                         data["content"] = content_dict
@@ -82,12 +116,13 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, month=N
                         file_name = url.split("/")[-1] + ".json"
                         file_path = os.path.join(data_path, file_name)
                         save_json_data(data, file_path)
+
                     else:
-                        print(f"Press release element not found for {url}")
+                        print(f"⚠️ No press release content elements found：{url}")
                 else:
-                    print(f"Error fetching HTML content for {url}")
+                    print(f"⚠️ HTML fetch fail：{url}")
             else:
-                print(f"Year not found in the URL: {link}")
+                print(f"⚠️ URL does not include year：{link}")
 
 def main_pressrelease(base_path, month=None):
     config_path = os.path.join(base_path, 'links_config.json')
@@ -97,12 +132,16 @@ def main_pressrelease(base_path, month=None):
     year_start = 2026
     year_end = 2026
     get_links = True
-    
+
+    print(f"➡️ 提取『今天』無連結時 → 自動 fallback 提取『整個月份』")
+    if month is not None:
+        print(f"📅 使用者指定月份：{month}（fallback 時會抓這個月份；未指定則抓今天的月份）")
+
     for category in config_data:
-            urls = config_data.get(category, [])
-            for base_url in urls:
-                print(f"\n--- Processing {category} URL: {base_url} ---")
-                extract_pressrelease(base_path, base_url, year_start, year_end, month, get_links)
+        urls = config_data.get(category, [])
+        for base_url in urls:
+            print(f"\n--- Processing {category} URL: {base_url} ---")
+            extract_pressrelease(base_path, base_url, year_start, year_end, month, get_links)
 
 # Download Legco Panel Paper links
 def setup_driver():
@@ -208,10 +247,10 @@ def append_to_existing_file(new_links, file_path):
     except FileNotFoundError:
         old_links = []
 
-    # 合併並以倒序方式排序
+    # Merge and sort in reverse order
     combined_links = sorted(set(old_links + new_links), reverse=True)
 
-    # 寫回到原先的link檔案
+    # Write back to the original link file
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump({"links": combined_links}, f, indent=2, ensure_ascii=False)
 
@@ -235,13 +274,13 @@ def main_link_filter(config_path):
 
         print(f"✅ Updated {category}: appended and sorted links in old files")
 
-# ---------------- 主流程入口 ----------------
-def main_combined(base_path=None):
+# Entry Point
+def main_combined(base_path=None, month=None):
     if base_path is None:
         base_path = '.'
 
     print("開始執行第一組代碼：新聞稿擷取")
-    main_pressrelease(base_path)
+    main_pressrelease(base_path, month)
 
     print("\n第一組代碼完成，開始執行第二組代碼：立法會連結擷取")
     legco_config_path = os.path.join(base_path, 'panel_paper_link_config.json')
@@ -254,4 +293,7 @@ def main_combined(base_path=None):
     main_link_filter(link_filter_config_path)
 
 if __name__ == '__main__':
-    main_combined()
+    parser = argparse.ArgumentParser(description="新聞稿與立法會資料擷取工具")
+    parser.add_argument('--month', type=int, help="指定月份 (例如: 12)")
+    args = parser.parse_args()
+    main_combined(month=args.month)

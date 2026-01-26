@@ -63,12 +63,14 @@ def trigger_run():
     if not data or 'callback_url' not in data:
         return jsonify({"error": "Missing 'callback_url' in request body"}), 400
     callback_url = data['callback_url']
+    month = data['month'] if "month" in data else None
 
     thread = threading.Thread(
         target=run_pipeline_and_callback,
         args=(callback_url,
               fetch_link_main,
-              BASE_PATH
+              BASE_PATH,
+              month
               )
     )
     thread.daemon = True

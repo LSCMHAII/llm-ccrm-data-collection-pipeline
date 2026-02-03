@@ -5,6 +5,9 @@ import time
 import argparse
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 from utils import (
     linkExtractor, extract_year, get_html_content, parse_html,
@@ -28,60 +31,33 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, month=N
     data_base_path = os.path.join(base_path, 'data')
     url_label = get_url_label(base_url)
 
-    for y in range(year_start, year_end + 1):
-        links_file = os.path.join(link_path, f"{y}_links_{url_label}.json")
-        # Try to fetch today URL
-        if get_links:
-            print(f"➡️ 第一次提取：以『今天』為條件")
-            linkExtractor(link_path, base_url, y, month=None)
+    today = datetime.now()
+    curr_year = today.year
+    curr_month = today.month
+    is_first_day_of_month = (today.day == 1) and (month is None)
 
-        # Check is there any files
-        if not os.path.exists(links_file):
-            print(f"⚠️ 今天的連結檔案不存在，準備 fallback 提取整個月份...")
-        else:
-            # Read today url
-            with open(links_file, "r", encoding="utf-8") as f:
-                day_links_data = json.load(f)
-            if day_links_data.get("links"):
-                print(f"✅ 今天有找到 {len(day_links_data.get('links', []))} 筆連結，直接處理內容。")
-            else:
-                print("⚠️ 今天沒有連結，將 fallback 提取整個月份。")
+    def get_prev_year_month(y, m):
+        if m == 1:
+            return (y - 1, 12)
+        return (y, m - 1)
+    prev_year, prev_month = get_prev_year_month(curr_year, curr_month)
+    # Relative joins processed in this round (to avoid duplication)
+    processed_links = set()
 
-        need_month_fallback = (
-            not os.path.exists(links_file) or
-            not day_links_data.get("links", [])
-        )
-
-        if need_month_fallback:
-            # If no month is specified, use the month of today.
-            fallback_month = month if month is not None else datetime.now().month
-            print(f"➡️ Fallback：Change to extract 'the entire month' (month={fallback_month})")
-            linkExtractor(link_path, base_url, y, month=fallback_month)
-
-            # Reload (the entire month)
-            if not os.path.exists(links_file):
-                print(f"❌ 仍未找到連結檔案，跳過年份 {y}")
-                continue
-
-            with open(links_file, "r", encoding="utf-8") as f:
-                month_links_data = json.load(f)
-
-            if not month_links_data.get("links"):
-                print(f"❌ 整個月份 (month={fallback_month}) 也沒有連結，跳過年份 {y}")
-                continue
-
-            links_data = month_links_data
-        else:
-            links_data = day_links_data
-
-        data_path = os.path.join(data_base_path, f'{y}')
+    # Process Links Data
+    def process_links_data(links_data, target_year):
+        data_path = os.path.join(data_base_path, f'{target_year}')
         os.makedirs(data_path, exist_ok=True)
 
         for link in links_data.get("links", []):
-            print(f"處理連結: {link}")
-            link_year = extract_year(link) 
+            # Deduplication: In the same round of execution, identical relative links are not processed repeatedly.
+            if link in processed_links:
+                continue
+            processed_links.add(link)
+            print(f"Processing links: {link}")
+            link_year = extract_year(link)
             if link_year is not None:
-                # Combine complete URL
+                # Combine the URL
                 link_trimmed = '/'.join(link.split('/')[1:])
                 url = f"{base_url}/{link_trimmed}"
                 html_content = get_html_content(url)
@@ -90,11 +66,10 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, month=N
                     soup = parse_html(html_content)
                     title = get_title(soup)
                     pressrelease = extract_press_release_content(soup)
-
                     if pressrelease:
-                        pattern = r'&amp;amp;amp;amp;lt;br/&amp;amp;amp;amp;gt;\n|&amp;amp;amp;amp;lt;/p&amp;amp;amp;amp;gt;\n&amp;amp;amp;amp;lt;p&amp;amp;amp;amp;gt;|&amp;amp;amp;amp;lt;br/&amp;amp;amp;amp;gt;\r\n'
+                        # Preserve your original segmentation and decoding logic
+                        pattern = r'&amp;amp;amp;amp;amp;lt;br/&amp;amp;amp;amp;amp;gt;\n|&amp;amp;amp;amp;amp;lt;/p&amp;amp;amp;amp;amp;gt;\n&amp;amp;amp;amp;amp;lt;p&amp;amp;amp;amp;amp;gt;|&amp;amp;amp;amp;amp;lt;br/&amp;amp;amp;amp;amp;gt;\r\n'
                         content = re.split(pattern, str(pressrelease))
-
                         try:
                             date, time_str = get_date_time(content[-2])
                             data = create_json_data(title, date, time_str)
@@ -102,36 +77,112 @@ def extract_pressrelease(base_path, base_url, year_start, year_end=None, month=N
                         except (IndexError, AttributeError):
                             print(f"❌ Date parsing failed：{link}")
                             continue
-
-                        content_dict = {
-                            f"p{i+1}": part.lstrip("&amp;amp;amp;amp;lt;br/&amp;amp;amp;amp;gt;\n").strip()
-                            for i, part in enumerate(content) if part.strip()
-                        }
+                        content_dict = {f"p{i+1}": part.lstrip("&amp;amp;amp;amp;amp;lt;br/&amp;amp;amp;amp;amp;gt;\n").strip() for i, part in enumerate(content) if part.strip()}
                         data["content"] = content_dict
-
                         file_name = url.split("/")[-1] + ".json"
                         file_path = os.path.join(data_path, file_name)
                         save_json_data(data, file_path)
 
+
                     else:
                         print(f"⚠️ No press release content elements found：{url}")
                 else:
-                    print(f"⚠️ HTML fetch fail：{url}")
+                    print(f"⚠️ HTML fetching failed：{url}")
             else:
-                print(f"⚠️ URL does not include year：{link}")
+                print(f"⚠️ does not include year：{link}")
+
+    for y in range(year_start, year_end + 1):
+        links_file_this_year = os.path.join(link_path, f"{y}_links_{url_label}.json")
+
+        # Step 1: Dealing with "Today" and "Monthly Fallback"
+        day_links_data = {}
+        month_links_data = {}
+
+        if get_links:
+            # Fetch『Today』links
+            print(f"➡️ First retrieval: Based on 'today' (month=None)")
+            linkExtractor(link_path, base_url, y, month=None)
+
+            # Read today's archives (which have not yet been overwritten by last month's).
+            if os.path.exists(links_file_this_year):
+                with open(links_file_this_year, "r", encoding="utf-8") as f:
+                    day_links_data = json.load(f)
+                if day_links_data.get("links"):
+                    print(f"✅ Found {len(day_links_data.get('links', []))} links today and will process them first")
+                else:
+                    print("⚠️ No links today（links empty），will fallback to fetch the entire month")
+            else:
+                print(f"⚠️ The linked archive for today does not exist; will fallback to retrieve the entire month...")
+
+        # Determine if a fallback is needed to fetch the entire month.
+        need_month_fallback = (
+            not day_links_data.get("links", [])
+        )
+
+        if need_month_fallback:
+            # If no month is specified, the default value is "the month of today"
+            fallback_month = month if month is not None else today.month
+            print(f"➡️ Fallback: Shift to fetch the entire month. (month={fallback_month})")
+            linkExtractor(link_path, base_url, y, month=fallback_month)
+
+            if os.path.exists(links_file_this_year):
+                with open(links_file_this_year, "r", encoding="utf-8") as f:
+                    month_links_data = json.load(f)
+
+            if not month_links_data.get("links"):
+                print(f"❌ Entire month (month={fallback_month}) no links，skipping the year {y} for current-month processing")
+            else:
+                # Process links for the entire month (or today) first.
+                process_links_data(month_links_data, y)
+        else:
+            # If you find today's link, process today's request first
+            process_links_data(day_links_data, y)
+
+        # Step 2 : If it's the 1st of each month, process the 'previous month' separately
+        if is_first_day_of_month:
+            # This call was made just a month ago; to avoid overwriting "today's" files.
+            print(f"🗓️ Detected new month (day=1). Also fetching previous month {prev_year}-{prev_month:02d} links...")
+            linkExtractor(link_path, base_url, prev_year, month=prev_month)
+
+            if prev_year == y:
+                # The previous month of the same year: Read directly from the "current year" file (which was just overwritten by the previous month).
+                if os.path.exists(links_file_this_year):
+                    with open(links_file_this_year, "r", encoding="utf-8") as f:
+                        prev_month_links_data = json.load(f)
+                    if prev_month_links_data.get("links"):
+                        print(f"🟡 Additionally processing previous month ({prev_year}-{prev_month:02d}) links in the same year.")
+                        process_links_data(prev_month_links_data, y)
+                    else:
+                        print(f"ℹ️ Previous month ({prev_year}-{prev_month:02d}) has no links in file {links_file_this_year}")
+                else:
+                    print(f"ℹ️ Previous month file not found for same year: {links_file_this_year}")
+            else:
+                # One month into the new year: Retrieving files from the previous year.
+                prev_links_file = os.path.join(link_path, f"{prev_year}_links_{url_label}.json")
+                if not os.path.exists(prev_links_file):
+                    print(f"ℹ️ Previous month ({prev_year}-{prev_month:02d}) file not found: {prev_links_file}")
+                else:
+                    with open(prev_links_file, "r", encoding="utf-8") as f:
+                        prev_month_links_data = json.load(f)
+                    if prev_month_links_data.get("links"):
+                        print(f"🟡 Additionally processing previous month ({prev_year}-{prev_month:02d}) links across year {prev_year}.")
+                        process_links_data(prev_month_links_data, prev_year)
+                    else:
+                        print(f"ℹ️ Previous month ({prev_year}-{prev_month:02d}) has no links in file {prev_links_file}")
 
 def main_pressrelease(base_path, month=None):
     config_path = os.path.join(base_path, 'links_config.json')
     with open(config_path, 'r', encoding='utf-8') as f:
         config_data = json.load(f)
 
+    # current setting (fixed for 2026); if you want it to be dynamic, you can change it to datetime.now().year.
     year_start = 2026
-    year_end = 2026
+    year_end = datetime.now().year
     get_links = True
 
-    print(f"➡️ 提取『今天』無連結時 → 自動 fallback 提取『整個月份』")
+    print(f"➡️ Execution strategy：First, capture instances where there are no links for 『today』 → automatically fallback to capture the 『entire month』")
     if month is not None:
-        print(f"📅 使用者指定月份：{month}（fallback 時會抓這個月份；未指定則抓今天的月份）")
+        print(f"📅 Specified month：{month}（fallback use this month; if not specified, it will use today's month.）")
 
     for category in config_data:
         urls = config_data.get(category, [])
@@ -141,9 +192,15 @@ def main_pressrelease(base_path, month=None):
 
 # Download Legco Panel Paper links
 def setup_driver():
-    options = webdriver.ChromeOptions()
+    options = Options()
     options.add_argument('--headless')
-    return webdriver.Chrome(options=options)
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-gpu")
+
+    driver_path = ChromeDriverManager().install()
+    service = Service(driver_path)
+
+    return webdriver.Chrome(service=service, options=options)
 
 def fetch_page_source(url):
     driver = setup_driver()
@@ -185,8 +242,7 @@ def save_links_to_json(links, year, lang, output_folder):
         json.dump(data, f, ensure_ascii=False, indent=2)
     return output_path
 
-def main_legco(config):
-    base_path = '.'
+def main_legco(config, base_path='.'):
     link_path = os.path.join(base_path, 'links')
     config["direct_path"] = datetime.now().strftime("%Y%m%d")
 
@@ -210,7 +266,7 @@ def load_json(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def save_json_diff(data, output_path):
+def save_json(data, output_path):
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
@@ -266,20 +322,18 @@ def main_link_filter(config_path):
         print(f"✅ Updated {category}: appended and sorted links in old files")
 
 # Entry Point
-def main_combined(month=None):
-    base_path = '.'
-    # base_path = r'\\10.104.1.17\llm-ccrm\data\pipeline_data_collection'
-    # month = 12
+def main_combined(base_path=None, month=None):
+    if base_path is None:
+        base_path = '.'
 
     print("開始執行第一組代碼：新聞稿擷取")
     main_pressrelease(base_path, month)
-    # main_pressrelease(base_path)
 
     print("\n第一組代碼完成，開始執行第二組代碼：立法會連結擷取")
     legco_config_path = os.path.join(base_path, 'panel_paper_link_config.json')
     with open(legco_config_path, 'r', encoding='utf-8') as f:
         legco_config = json.load(f)
-    main_legco(legco_config)
+    main_legco(legco_config, base_path)
 
     print("\n第二組代碼完成，開始執行第三組代碼：比對新舊連結")
     link_filter_config_path = os.path.join(base_path, 'filtering_link_config.json')

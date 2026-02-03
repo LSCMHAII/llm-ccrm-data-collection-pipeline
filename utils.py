@@ -3,10 +3,11 @@ from bs4 import BeautifulSoup
 import json, os, re
 from datetime import datetime
 
+# 從 URL 擷取年份
 def extract_year(url):
     match = re.search(r'\d{4}', url)
     return int(match.group()) if match else None
-
+# 取得 HTML 內容
 def get_html_content(url):
     response = requests.get(url)
     if response.status_code == 200:
@@ -14,17 +15,21 @@ def get_html_content(url):
     print(f"Error: {response.status_code}")
     return None
 
+# 解析 HTML
 def parse_html(html_content):
     return BeautifulSoup(html_content, "html.parser")
 
+# 擷取標題
 def get_title(soup):
     title_element = soup.find("h2")
     return title_element.get_text(strip=True) if title_element else ""
 
+# 擷取描述（如果有第二個 h2）
 def get_description(soup):
     elements = soup.find_all("h2")
     return elements[1].get_text(strip=True) if len(elements) > 1 else ""
 
+# 擷取日期與時間
 def get_date_time(content):
     pattern = r'Ends/(\w+,\s*\w+\s+\d+,\s*\d+)'
     if isinstance(content, str):
@@ -38,6 +43,7 @@ def get_date_time(content):
                     return (match.group(1), "")
     return "", ""
 
+# 擷取新聞稿內容
 def extract_press_release_content(soup):
     content = soup.find("div", class_="contentThin")
     if content:
@@ -45,6 +51,7 @@ def extract_press_release_content(soup):
         return "\n".join(str(e) for e in elements) if elements else ""
     return ""
 
+# 建立 JSON 資料結構
 def create_json_data(title, date, time):
     return {
         "metadata": {"date": date, "time": time},
@@ -52,13 +59,13 @@ def create_json_data(title, date, time):
         "content": []
     }
 
+# 儲存 JSON 檔案
 def save_json_data(data, filename):
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
-    print("JSON file created successfully.")
+    print("✅ JSON file created successfully.")
 
-
-
+# 擷取新聞稿連結
 def linkExtractor(data_path, base_url, year, month=None):
     # 判斷語言與標籤
     lang = "cn" if "/cn/" in base_url else "en"
@@ -82,7 +89,7 @@ def linkExtractor(data_path, base_url, year, month=None):
         soup = BeautifulSoup(response.content, "html.parser")
         links = []
 
-        # 搵table中的所有行
+        # 找出 table 中的所有行
         rows = soup.find_all("tr")
         for row in rows:
             cols = row.find_all("td")
@@ -93,12 +100,14 @@ def linkExtractor(data_path, base_url, year, month=None):
                     href = link_tag["href"]
                     try:
                         day, mth, yr = map(int, date_text.split("/"))
-                        # 檢查月份
-                        if month and mth != month:
-                            continue
-                        # 檢查是否是今天日期
-                        if day != today_day or mth != today_month or yr != today_year:
-                            continue
+                        # 如果指定 month → 保留該月份所有連結
+                        if month:
+                            if mth != month:
+                                continue
+                        else:
+                            # 沒有指定 month → 只保留今天日期
+                            if month == None and day != today_day or mth != today_month or yr != today_year:
+                                continue
                     except ValueError:
                         continue
                     links.append(href)
@@ -115,5 +124,8 @@ def linkExtractor(data_path, base_url, year, month=None):
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(links_json, f, ensure_ascii=False, indent=4)
 
-        print(f"Saved {json_path} (共 {len(links)} 筆連結, 僅保留今天日期: {today.strftime('%d/%m/%Y')})")
+        print(f"✅ Saved {json_path} (共 {len(links)} 筆連結, 條件: {'month='+str(month) if month else '今天'})")
         return filename
+    else:
+        print(f"❌ 無法取得 {url}，HTTP 狀態碼: {response.status_code}")
+        return None

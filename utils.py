@@ -106,7 +106,7 @@ def linkExtractor(data_path, base_url, year, month=None):
                                 continue
                         else:
                             # 沒有指定 month → 只保留今天日期
-                            if day != today_day or mth != today_month or yr != today_year:
+                            if month == None and day != today_day or mth != today_month or yr != today_year:
                                 continue
                     except ValueError:
                         continue
